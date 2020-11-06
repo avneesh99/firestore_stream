@@ -77,8 +77,12 @@ WSGI_APPLICATION = 'firestore_stream.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'dfdjdpfqcf5i1v',
+        'USER': 'qxdnarkogpnyyj',
+        'PASSWORD': 'a0e05ec85ecf1d7d2307d53f5bf53621a1d0ea02cc49dc28139472ed7259a802',
+        'HOST': 'ec2-54-196-89-124.compute-1.amazonaws.com',
+        'PORT': '5432'
     }
 }
 

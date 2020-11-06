@@ -1,101 +1,108 @@
-from firebase_admin import firestore
-from datetime import datetime
+from core.initialization_functions.content import Content, ContentReserve
+from core.initialization_functions.content_reserve_list import GetContentReserveList
+from core.initialization_functions.firestore_functions import SendingTotalFeedListToFirestore, \
+    EditFeedPreferenceCollection, AddToContentReserveCollection
+from core.initialization_functions.total_feed_list import BuildTotalFeedList
 
 
-def BuildAndSendFeed(uid: str, initialFeedPreferenceDict: dict) -> bool:
-    content_dict = get_content_dict()
+def BuildAndSendFeed(userUid: str, rawFeedPreferenceDict: dict[str, list[str]]):
+    cacheContentDetailsDict: dict[str, Content] = {}
 
-    try:
-        feed_list = build_feed(user_feed_preference_dict=initialFeedPreferenceDict, content_dict=content_dict)
-    except Exception as e:
-        print(f'Error in creating feed_list: {e}')
-        return False
+    feedPreferenceDict = BuildFeedPreferenceDict(rawFeedPreferenceDict=rawFeedPreferenceDict)
 
-    try:
-        send_feed(uid=uid, feed_list=feed_list)
-    except Exception as e:
-        print(f'Error in sending feed: {e}')
-        return False
+    contentReserveList: list[ContentReserve] = GetContentReserveList(feedPreferenceDict=feedPreferenceDict)
 
-    try:
-        edit_feed_preference_collection(uid=uid,
-                                        initial_feed_preference_dict=initialFeedPreferenceDict)
-    except Exception as e:
-        print(f'Error in editing feed preference: {e}')
-        return False
+    totalFeedList = BuildTotalFeedList(
+        contentReserveList=contentReserveList,
+        cacheContentDetailsDict=cacheContentDetailsDict,
+        feedPreferenceDict=feedPreferenceDict,
+    )
 
-    return True
+    result = SendingTotalFeedListToFirestore(
+        totalFeedList=totalFeedList,
+        userUid=userUid
+    )
+
+    AddToContentReserveCollection(userUid=userUid, contentReserveList=contentReserveList)
+
+    EditFeedPreferenceCollection(uid=userUid, initialFeedPreferenceDict=feedPreferenceDict)
 
 
-def get_content_dict():
-    db = firestore.client()
-    category_wise_content_col_ref = db.collection(u'CategoryWiseContent')
-    content_dict = {}
-    for doc_snapshot in category_wise_content_col_ref.stream():
-        content_dict[doc_snapshot.id] = doc_snapshot.to_dict()['data']
-    print('Done getting content_dict')
-    return content_dict
+def BuildFeedPreferenceDict(rawFeedPreferenceDict: dict[str, list[str]]) -> dict[str, str]:
+    feedPreferenceDict: dict[str, str] = {}
 
+    if 'coding' in rawFeedPreferenceDict.keys():
+        feedPreferenceDict['coding'] = rawFeedPreferenceDict['coding'][0]
+    else:
+        feedPreferenceDict['coding'] = 'notAnswered'
 
-def build_feed(user_feed_preference_dict: dict, content_dict: dict) -> list:
-    feed_list = []
-    category_order_list = []
+    if 'finance' in rawFeedPreferenceDict.keys():
+        feedPreferenceDict['finance'] = rawFeedPreferenceDict['finance'][0]
+    else:
+        feedPreferenceDict['finance'] = 'notAnswered'
 
-    for category_name, preference_value in user_feed_preference_dict.items():
-        if preference_value > 0:
-            user_feed_preference_dict[category_name] = 2 ** (preference_value - 1)
+    if 'football' in rawFeedPreferenceDict.keys():
+        feedPreferenceDict['football'] = rawFeedPreferenceDict['football'][0]
+    else:
+        feedPreferenceDict['football'] = 'notAnswered'
 
-    flag = True
-    count_dict = {}
-    while flag:
-        flag = False
-        for category_name, preference_value in user_feed_preference_dict.items():
-            if category_name not in content_dict.keys():
-                continue
-            if preference_value > 0:
-                flag = True
-                category_order_list.append(category_name)
-                user_feed_preference_dict[category_name] -= 1
-            count_dict[category_name] = 0
+    if 'indPolitics' in rawFeedPreferenceDict.keys():
+        feedPreferenceDict['indPolitics'] = rawFeedPreferenceDict['indPolitics'][0]
+        feedPreferenceDict['india'] = 'medium'
+    else:
+        feedPreferenceDict['indPolitics'] = 'notAnswered'
+        feedPreferenceDict['india'] = 'low'
 
-    num_of_contents = 0
-    counter = 0
-    missed_counter = 0
-    while num_of_contents < 100 and missed_counter < len(category_order_list):
-        category_name = category_order_list[counter % len(category_order_list)]
-        idx = count_dict[category_name]
-        if idx < len(content_dict[category_name]):
-            missed_counter = 0
-            feed_list.append(content_dict[category_name][idx])
-            count_dict[category_name] += 1
-            num_of_contents += 1
+    if 'cricket' in rawFeedPreferenceDict.keys():
+        feedPreferenceDict['cricket'] = rawFeedPreferenceDict['cricket'][0]
+    else:
+        feedPreferenceDict['cricket'] = 'notAnswered'
+
+    feedPreferenceDict['tv'] = 'rare'
+    feedPreferenceDict['world'] = 'low'
+    feedPreferenceDict['marketing'] = 'rare'
+    feedPreferenceDict['history'] = 'rare'
+    feedPreferenceDict['random'] = 'rare'
+    feedPreferenceDict['indNonPolitics'] = 'high'
+
+    if 'tech' in rawFeedPreferenceDict.keys():
+        if feedPreferenceDict['coding'] not in ['notAnswered', 'skipped']:
+            feedPreferenceDict['tech'] = 'high'
         else:
-            missed_counter += 1
-        counter += 1
+            feedPreferenceDict['tech'] = rawFeedPreferenceDict['tech'][0]
+    else:
+        feedPreferenceDict['tech'] = 'notAnswered'
 
-    return feed_list
+    if 'market' in rawFeedPreferenceDict.keys():
+        feedPreferenceDict['market'] = rawFeedPreferenceDict['market'][0]
+        if feedPreferenceDict['market'] == 'skipped':
+            feedPreferenceDict['market'] = 'medium'
+    else:
+        feedPreferenceDict['market'] = 'skipped'
 
+    for item in ['python', 'flutter', 'golang', 'nodejs', 'ml', 'frontend']:
+        feedPreferenceDict[item] = 'skipped'
+    if 'codingTech' in rawFeedPreferenceDict.keys():
+        for i in rawFeedPreferenceDict['codingTech']:
+            feedPreferenceDict[i] = 'high'
 
-def send_feed(feed_list, uid):
-    db = firestore.client()
+    for item in ['f1', 'ufc', 'tennis']:
+        feedPreferenceDict[item] = 'skipped'
+    if 'otherSports' in rawFeedPreferenceDict.keys():
+        for i in rawFeedPreferenceDict['otherSports']:
+            feedPreferenceDict[i] = 'medium'
 
-    i, feedNo = 0, 1
-    while i < len(feed_list):
-        db.collection('UserFeed').document(uid).collection('newsfeed').document(f'feed_{feedNo}').set({
-            'feedList': feed_list[i:i + 10]
-        })
-        feedNo += 1
-        i += 10
+    for item in ['music', 'rock', 'rap']:
+        feedPreferenceDict[item] = 'skipped'
+    for item in rawFeedPreferenceDict['music']:
+        feedPreferenceDict[item] = 'high'
+        feedPreferenceDict['music'] = 'low'
 
-    db.collection('UserFeed').document(uid).set({
-        'feedCount': feedNo-1
-    })
+    if feedPreferenceDict['tech'] == 'high':
+        feedPreferenceDict['gaming'] = 'rare'
+        feedPreferenceDict['science'] = 'rare'
+    else:
+        feedPreferenceDict['gaming'] = 'skipped'
+        feedPreferenceDict['science'] = 'skipped'
 
-
-def edit_feed_preference_collection(uid: str, initial_feed_preference_dict: dict):
-    db = firestore.client()
-
-    db.collection('FeedPreference').document(uid).set({
-        'InitialPreference': initial_feed_preference_dict,
-        'LastUpdated': datetime.utcnow()
-    })
+    return feedPreferenceDict

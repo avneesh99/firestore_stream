@@ -1,40 +1,80 @@
 from firebase_admin import firestore
+from django.utils import timezone
 
 
 def BuildAndSendMap(uid: str) -> bool:
-    mappingSubTopics = {
-                           'Home': {
-                               'Finance': {'x': 0, 'y': 0, 'height': 0.25, 'width': 0.5},
-                               'India': {'x': 0.5, 'y': 0, 'height': 0.25, 'width': 0.5},
+    mappingSubTopics: dict[str, dict[str, dict[str, float]]] = {
+        'Home': {
+            'Finance': {'x': 0, 'y': 0, 'height': 0.25, 'width': 0.5},
+            'India': {'x': 0.5, 'y': 0, 'height': 0.25, 'width': 0.5},
 
-                               'Hollywood': {'x': 0, 'y': 0.25, 'height': 0.15, 'width': 0.33},
-                               'Music': {'x': 0.33, 'y': 0.25, 'height': 0.15, 'width': 0.34},
-                               'Bollywood': {'x': 0.67, 'y': 0.25, 'height': 0.15, 'width': 0.33},
+            'Music': {'x': 0, 'y': 0.25, 'height': 0.15, 'width': 0.33},
+            'TV': {'x': 0.33, 'y': 0.25, 'height': 0.15, 'width': 0.34},
+            'Gaming': {'x': 0.67, 'y': 0.25, 'height': 0.15, 'width': 0.33},
 
-                               'Sports': {'x': 0, 'y': 0.4, 'height': 0.2, 'width': 0.75},
-                               'Gaming': {'x': 0.75, 'y': 0.4, 'height': 0.2, 'width': 0.25},
+            'Sports': {'x': 0, 'y': 0.4, 'height': 0.25, 'width': 0.75},
+            'World': {'x': 0.75, 'y': 0.4, 'height': 0.25, 'width': 0.25},
 
-                               'Tech': {'x': 0.0, 'y': 0.6, 'height': 0.2, 'width': 0.5},
-                               'Sample': {'x': 0.5, 'y': 0.6, 'height': 0.2, 'width': 0.5},
+            'Science': {'x': 0.0, 'y': 0.65, 'height': 0.2, 'width': 0.5},
+            'Tech': {'x': 0.5, 'y': 0.65, 'height': 0.2, 'width': 0.5},
 
-                               'Science': {'x': 0.0, 'y': 0.8, 'height': 0.2, 'width': 0.25},
-                               'World': {'x': 0.25, 'y': 0.8, 'height': 0.2, 'width': 0.75},
-                           },
-                           'Sports': {
-                               'Cricket': {'x': 0.0, 'y': 0.0, 'height': 0.5, 'width': 0.75},
-                               'F1': {'x': 0.75, 'y': 0.0, 'height': 0.5, 'width': 0.25},
+            'Marketing': {'x': 0, 'y': 0.85, 'height': 0.15, 'width': 0.33},
+            'History': {'x': 0.33, 'y': 0.85, 'height': 0.15, 'width': 0.34},
+            'Random': {'x': 0.67, 'y': 0.85, 'height': 0.15, 'width': 0.33},
+        },
 
-                               'Tennis': {'x': 0.0, 'y': 0.5, 'height': 0.5, 'width': 0.25},
-                               'Football': {'x': 0.25, 'y': 0.5, 'height': 0.5, 'width': 0.75},
-                           }
-                       }
+        'Music': {
+            'MusicGeneral': {'x': 0.0, 'y': 0.0, 'height': 1.0, 'width': 0.5},
+            'Rap': {'x': 0.5, 'y': 0.0, 'height': 0.5, 'width': 0.5},
+            'Rock': {'x': 0.5, 'y': 0.5, 'height': 0.5, 'width': 0.5},
+        },
+
+        'Sports': {
+            'Cricket': {'x': 0.0, 'y': 0.0, 'height': 0.5, 'width': 0.5},
+            'Football': {'x': 0.5, 'y': 0.0, 'height': 0.5, 'width': 0.5},
+
+            'F1': {'x': 0.0, 'y': 0.5, 'height': 0.5, 'width': 0.33},
+            'UFC': {'x': 0.33, 'y': 0.5, 'height': 0.5, 'width': 0.34},
+            'Tennis': {'x': 0.67, 'y': 0.5, 'height': 0.5, 'width': 0.33},
+        },
+
+        'Tech': {
+            'TechGeneral': {'x': 0.0, 'y': 0.0, 'height': 1.0, 'width': 0.5},
+            'Coding': {'x': 0.5, 'y': 0.0, 'height': 1.0, 'width': 0.5}
+        },
+
+        'Coding': {
+            'Python': {'x': 0.0, 'y': 0.0, 'height': 0.34, 'width': 0.5},
+            'ML': {'x': 0.5, 'y': 0.0, 'height': 0.34, 'width': 0.5},
+            'GoLang': {'x': 0.0, 'y': 0.34, 'height': 0.33, 'width': 0.5},
+            'Flutter': {'x': 0.5, 'y': 0.34, 'height': 0.33, 'width': 0.5},
+            'nodejs': {'x': 0.0, 'y': 0.67, 'height': 0.33, 'width': 0.5},
+            'frontend': {'x': 0.5, 'y': 0.67, 'height': 0.33, 'width': 0.5},
+        }
+    }
 
     try:
         db = firestore.client()
         db.collection('Map').document(uid).set({
             'mappingSubTopics': mappingSubTopics
         })
-        db.collection('Map').document(uid).collection('Coordinates').document('other').set({})
+        db.collection('Map').document(uid).collection('Coordinates').document('other').set({
+            # 'onboardingStory':
+            #     {
+            #         'xCoord': 0.70,
+            #         'yCoord': 0.4,
+            #         'viewed': False,
+            #         'publisherUsername': 'hotavneesh',
+            #         'publisherUid': shareDict['publisherUid'],
+            #         'storyCreatedTime': timezone.now(),
+            #         'text': 'Hello! Please tap inside the box below',
+            #         'referencedPage': shareDict['referencedPage'],
+            #         'referencedUsername': shareDict['referencedUsername'],
+            #         'referencedProfilePicture': shareDict['referencedProfilePicture'],
+            #         'referencedContentId': shareDict['referencedContentId'],
+            #         'ownStory': False
+            #     }
+        })
         db.collection('Map').document(uid).collection('Coordinates').document('self').set({})
     except Exception as e:
         print(f'Error in adding map: {e}')
