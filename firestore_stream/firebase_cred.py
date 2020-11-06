@@ -1,14 +1,14 @@
-import os
-firestore_cred_data = {
-    'auth_provider_x509_cert_url': os.environ['auth_provider_x509_cert_url'],
-    'auth_uri': os.environ['auth_uri'],
-    'client_email': os.environ['client_email'],
-    'client_id': os.environ['client_id'],
-    'client_x509_cert_url': os.environ['client_x509_cert_url'],
-    'DATABASE_URL': os.environ['DATABASE_URL'],
-    'private_key': os.environ['private_key'],
-    'private_key_id': os.environ['private_key_id'],
-    'project_id': os.environ['project_id'],
-    'token_uri': os.environ['token_uri'],
-    'type': os.environ['type']
-}
+# import os
+#
+# print(os.environ['auth_provider_x509_cert_url'])
+# print(os.environ['auth_uri'])
+# print(os.environ['client_email'])
+# print(os.environ['client_id'])
+# print(os.environ['client_x509_cert_url'])
+# print(os.environ['DATABASE_URL'])
+# print(os.environ['private_key'])
+# print(os.environ['private_key_id'])
+# print(os.environ['project_id'])
+# print(os.environ['token_uri'])
+# print(os.environ['type'])
+#
