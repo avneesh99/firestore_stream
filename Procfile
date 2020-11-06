@@ -1,1 +1,1 @@
-web: gunicorn firestore_stream.wsgi
+worker: python manage.py script
