@@ -1,0 +1,1 @@
+web: gunicorn firestore_stream.wsgi
