@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,11 +79,11 @@ WSGI_APPLICATION = 'firestore_stream.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dfdjdpfqcf5i1v',
-        'USER': 'qxdnarkogpnyyj',
-        'PASSWORD': 'a0e05ec85ecf1d7d2307d53f5bf53621a1d0ea02cc49dc28139472ed7259a802',
-        'HOST': 'ec2-54-196-89-124.compute-1.amazonaws.com',
-        'PORT': '5432'
+        'NAME': os.environ['db_name'],
+        'USER': os.environ['db_user'],
+        'PASSWORD': os.environ['db_password'],
+        'HOST': os.environ['db_host'],
+        'PORT': os.environ['db_port']
     }
 }
 
