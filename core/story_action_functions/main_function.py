@@ -5,6 +5,7 @@ def story_action_queue_on_snapshot(col_snapshot, changes, read_time):
     db = firestore.client()
     for change in changes:
         if change.type.name == 'ADDED':
+            print('\n')
             print(f'Received Document for following request: {change.document.id}')
             documentDict = change.document.to_dict()
 
@@ -66,6 +67,7 @@ def story_action_queue_on_snapshot(col_snapshot, changes, read_time):
 
         if change.type.name == 'REMOVED':
             print(f'Removed document {change.document.id}')
+            print('\n')
 
 
 def CheckingValidDocument(document_dict: dict) -> bool:

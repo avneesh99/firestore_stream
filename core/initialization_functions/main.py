@@ -11,9 +11,9 @@ def OnboardingQueueOnSnapshot(colSnapshot, changes, readTime):
     db = firestore.client()
     for change in changes:
         if change.type.name == 'ADDED':
+            print('\n')
             print(f'Received Document for onboarding {change.document.id}')
             documentDict: dict = change.document.to_dict()
-            startTime: datetime = timezone.now()
             if not CheckingValidDocument(documentDict=documentDict, documentId=change.document.id):
                 print(f'Error in the document {change.document.id}')
                 db.collection('Errors').document(change.document.id).set({
@@ -23,20 +23,12 @@ def OnboardingQueueOnSnapshot(colSnapshot, changes, readTime):
                 db.collection('OnboardingQueue').document(change.document.id).delete()
                 continue
 
-            BuildAndSendFeed(userUid=documentDict['uid'],
-                             rawFeedPreferenceDict=documentDict['InitialPreference'])
-
-            db.collection('UserDetails').document(documentDict['uid']).update({
-                'feedBuilt': True
-            })
-            print(f'Done building and sending feed in {timezone.now() - startTime}')
-
             mapStartTime: datetime = timezone.now()
             mapResult: bool = BuildAndSendMap(uid=documentDict['uid'])
-            db.collection('UserDetails').document(documentDict['uid']).update({
-                'mapUnread': True
-            })
             if mapResult:
+                db.collection('UserDetails').document(documentDict['uid']).update({
+                    'mapUnread': True
+                })
                 print(f'Done adding map in {timezone.now() - mapStartTime}')
             else:
                 print('error adding map')
@@ -45,6 +37,15 @@ def OnboardingQueueOnSnapshot(colSnapshot, changes, readTime):
                     'error': 'error in adding map'
                 })
                 continue
+
+            startTime: datetime = timezone.now()
+            BuildAndSendFeed(userUid=documentDict['uid'],
+                             rawFeedPreferenceDict=documentDict['InitialPreference'])
+
+            db.collection('UserDetails').document(documentDict['uid']).update({
+                'feedBuilt': True
+            })
+            print(f'Done building and sending feed in {timezone.now() - startTime}')
 
             addingToAllUsersResult = AddToAllUsers(uid=documentDict['uid'])
 

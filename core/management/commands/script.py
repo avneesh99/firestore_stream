@@ -28,7 +28,6 @@ class Command(BaseCommand):
             'token_uri': os.environ['token_uri'],
             'type': os.environ['type']
         }
-        print(firestore_cred_data)
         print('Starting script.py........................')
         print('\n')
         print('\n')

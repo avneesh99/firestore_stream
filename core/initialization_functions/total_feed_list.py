@@ -16,7 +16,6 @@ def BuildTotalFeedList(contentReserveList: list[ContentReserve], cacheContentDet
     # Sorting the list with increasing rank
     for category, value in categoryWiseContentReserveDict.items():
         for level, levelWiseContentReserveList in value.items():
-            print([x.rank for x in levelWiseContentReserveList], category, level)
             levelWiseContentReserveList.sort(key=lambda x: x.rank)
 
     categoryList = [x for x in categoryWiseContentReserveDict.keys()]
@@ -105,8 +104,6 @@ def GenerateSkeletonFeedList(feedPreferenceDict: dict[str, str], categoryList: l
 
     skeletonFeedList[:] = [x for x in skeletonFeedList if x is not None]
 
-    for i in skeletonFeedList:
-        print(i['category'], i['level'])
     return skeletonFeedList
 
 

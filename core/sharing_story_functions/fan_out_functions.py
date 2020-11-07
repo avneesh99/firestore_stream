@@ -73,9 +73,12 @@ def SendDataToUid(targetUid: str, shareDict: dict, selfStory: bool):
 
 
 def GetCoordinates(mappingDict: dict, category: str) -> (float, float):
-
     try:
-        modifiedCategory = {'music':'MusicGeneral', 'tech':'TechGeneral'}[category]
+        mapping = {'music': 'MusicGeneral',
+                   'tech': 'TechGeneral',
+                   'indPolitics': 'india',
+                   'indNonPolitics': 'india'}
+        modifiedCategory = mapping[category]
     except:
         modifiedCategory = category
 

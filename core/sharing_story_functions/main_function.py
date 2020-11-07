@@ -9,6 +9,7 @@ def SharingQueueOnSnapshot(col_snapshot, changes, read_time):
     db = firestore.client()
     for change in changes:
         if change.type.name == 'ADDED':
+            print('\n')
             print(f'Received Document {change.document.id}')
             startTime: datetime = timezone.now()
             documentDict: dict = change.document.to_dict()
@@ -70,6 +71,7 @@ def SharingQueueOnSnapshot(col_snapshot, changes, read_time):
 
             db.collection('SharingQueue').document(change.document.id).delete()
             print(f'Completed the process in {timezone.now() - startTime}')
+            print('\n')
 
 
 def GettingReferencedContentDetailsDict(contentId: str) -> dict:

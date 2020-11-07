@@ -5,6 +5,7 @@ def FollowingQueueOnSnapshot(col_snapshot, changes, read_time):
     db = firestore.client()
     for change in changes:
         if change.type.name in ['ADDED', 'MODIFIED']:
+            print('\n')
             print(f'Received Document for following request: {change.document.id}')
             documentDict = change.document.to_dict()
 
@@ -90,6 +91,7 @@ def FollowingQueueOnSnapshot(col_snapshot, changes, read_time):
 
         if change.type.name == 'REMOVED':
             print(f'Deleted document: {change.document.id}')
+            print('\n')
 
 
 def CheckingValidDocument(documentDict: dict) -> bool:
