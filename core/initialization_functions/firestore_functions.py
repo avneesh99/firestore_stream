@@ -124,9 +124,7 @@ def AddToContentReserveCollection(contentReserveList: list[ContentReserve], user
     db = firestore.client()
     finalDict = {}
     for contentReserveObj in contentReserveList:
-        finalDict[contentReserveObj.contentId] = {
-            'category': GetModifiedCategory(category=contentReserveObj.category)
-        }
+        finalDict[contentReserveObj.contentId] = GetModifiedCategory(category=contentReserveObj.category)
 
     db.collection('ContentReserve').document(userUid).set(finalDict)
 
