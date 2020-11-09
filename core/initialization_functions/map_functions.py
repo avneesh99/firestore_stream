@@ -59,21 +59,24 @@ def BuildAndSendMap(uid: str) -> bool:
             'mappingSubTopics': mappingSubTopics
         })
         db.collection('Map').document(uid).collection('Coordinates').document('other').set({
-            # 'onboardingStory':
-            #     {
-            #         'xCoord': 0.70,
-            #         'yCoord': 0.4,
-            #         'viewed': False,
-            #         'publisherUsername': 'hotavneesh',
-            #         'publisherUid': shareDict['publisherUid'],
-            #         'storyCreatedTime': timezone.now(),
-            #         'text': 'Hello! Please tap inside the box below',
-            #         'referencedPage': shareDict['referencedPage'],
-            #         'referencedUsername': shareDict['referencedUsername'],
-            #         'referencedProfilePicture': shareDict['referencedProfilePicture'],
-            #         'referencedContentId': shareDict['referencedContentId'],
-            #         'ownStory': False
-            #     }
+            'onboardingStory':
+                {
+                    'xCoord': 0.70,
+                    'yCoord': 0.4,
+                    'viewed': False,
+                    'publisherUsername': 'hotavneesh',
+                    'publisherUid': 'DAi3ntCGIwZNr9OKhQ5dfljz2Q73',
+                    'storyCreatedTime': timezone.now(),
+                    'text': 'Hello! Please tap inside the box below',
+                    'referencedPage': {
+                        'media': {'link': None, 'previewLink': None, 'type': None},
+                        'text': 'Click Here'
+                    },
+                    'referencedUsername': 'hotavneesh',
+                    'referencedProfilePicture': 'https://firebasestorage.googleapis.com/v0/b/hota-e8550.appspot.com/o/profilePics%2FDAi3ntCGIwZNr9OKhQ5dfljz2Q73?alt=media&token=3e3ad93c-c100-4313-b869-9980fa6f6ece',
+                    'referencedContentId': '0000Onboarding',
+                    'ownStory': False
+                }
         })
         db.collection('Map').document(uid).collection('Coordinates').document('self').set({})
     except Exception as e:
