@@ -116,7 +116,8 @@ def EditFeedPreferenceCollection(uid: str, initialFeedPreferenceDict: dict):
     db = firestore.client()
     db.collection('FeedPreference').document(uid).set({
         'InitialPreference': initialFeedPreferenceDict,
-        'LastUpdated': timezone.now()
+        'LastUpdated': timezone.now(),
+        'LastFannedOut': timezone.now()
     })
 
 
